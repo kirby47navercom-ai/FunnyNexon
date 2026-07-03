@@ -51,7 +51,6 @@ bool InputState::WasKeyPressed(unsigned int key) const {
 }
 
 float InputState::MousePicoY() const {
-    // pico2d는 화면 아래가 y=0이고, Win32 마우스 좌표는 화면 위가 y=0이다.
+    // pico2d 좌표는 아래가 y=0이고, Win32 마우스 좌표는 위가 y=0이라 뒤집어 준다.
     return CanvasHeight - 1.0f - m_mouseY;
 }
-

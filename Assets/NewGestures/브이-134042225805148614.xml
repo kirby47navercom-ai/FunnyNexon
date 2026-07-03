@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name = "브이">
+	<Stroke>
+		<Point X = "88" Y = "60" T = "0" Pressure = "0" />
+		<Point X = "88" Y = "64" T = "0" Pressure = "0" />
+		<Point X = "88" Y = "67" T = "0" Pressure = "0" />
+		<Point X = "88" Y = "71" T = "0" Pressure = "0" />
+		<Point X = "88" Y = "79" T = "0" Pressure = "0" />
+		<Point X = "90" Y = "87" T = "0" Pressure = "0" />
+		<Point X = "92" Y = "97" T = "0" Pressure = "0" />
+		<Point X = "96" Y = "114" T = "0" Pressure = "0" />
+		<Point X = "99" Y = "126" T = "0" Pressure = "0" />
+		<Point X = "103" Y = "137" T = "0" Pressure = "0" />
+		<Point X = "112" Y = "163" T = "0" Pressure = "0" />
+		<Point X = "125" Y = "190" T = "0" Pressure = "0" />
+		<Point X = "131" Y = "202" T = "0" Pressure = "0" />
+		<Point X = "142" Y = "221" T = "0" Pressure = "0" />
+		<Point X = "153" Y = "236" T = "0" Pressure = "0" />
+		<Point X = "164" Y = "247" T = "0" Pressure = "0" />
+		<Point X = "180" Y = "258" T = "0" Pressure = "0" />
+		<Point X = "188" Y = "262" T = "0" Pressure = "0" />
+		<Point X = "201" Y = "267" T = "0" Pressure = "0" />
+		<Point X = "222" Y = "273" T = "0" Pressure = "0" />
+		<Point X = "231" Y = "275" T = "0" Pressure = "0" />
+		<Point X = "249" Y = "278" T = "0" Pressure = "0" />
+		<Point X = "270" Y = "278" T = "0" Pressure = "0" />
+		<Point X = "286" Y = "277" T = "0" Pressure = "0" />
+		<Point X = "308" Y = "272" T = "0" Pressure = "0" />
+		<Point X = "325" Y = "266" T = "0" Pressure = "0" />
+		<Point X = "356" Y = "251" T = "0" Pressure = "0" />
+		<Point X = "390" Y = "229" T = "0" Pressure = "0" />
+		<Point X = "400" Y = "221" T = "0" Pressure = "0" />
+		<Point X = "417" Y = "201" T = "0" Pressure = "0" />
+		<Point X = "429" Y = "184" T = "0" Pressure = "0" />
+		<Point X = "439" Y = "168" T = "0" Pressure = "0" />
+		<Point X = "443" Y = "162" T = "0" Pressure = "0" />
+	</Stroke>
+</Gesture>

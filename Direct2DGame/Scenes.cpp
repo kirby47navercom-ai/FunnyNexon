@@ -1,18 +1,16 @@
 #include "Scenes.h"
 
-#include "Boss.h"
 #include "Constants.h"
 #include "GameApp.h"
+#include "GestureCanvas.h"
 #include "Input.h"
 #include "Player.h"
 #include "Renderer.h"
+#include "Stages.h"
 
-#include <Windows.h>
 #include <algorithm>
-#include <cmath>
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace {
 bool Clicked(const InputState& input, float left, float bottom, float right, float top) {
@@ -25,15 +23,10 @@ bool Clicked(const InputState& input, float left, float bottom, float right, flo
     return left <= x && x <= right && bottom <= y && y <= top;
 }
 
-float Distance(D2D1_POINT_2F a, D2D1_POINT_2F b) {
-    const float dx = a.x - b.x;
-    const float dy = a.y - b.y;
-    return std::sqrt(dx * dx + dy * dy);
-}
-
 void DrawCoin(Renderer& renderer, int coin) {
     renderer.DrawImage(L"Assets\\배경\\coin.png", CanvasWidth * 0.5f, CanvasHeight * 0.5f);
-    renderer.DrawTextPico(L"X " + std::to_wstring(coin), 82.0f, 700.0f, 260.0f, 70.0f, 52.0f, D2D1::ColorF(D2D1::ColorF::Black));
+    renderer.DrawTextPico(L"X " + std::to_wstring(coin), 82.0f, 700.0f, 260.0f, 70.0f, 52.0f,
+        D2D1::ColorF(D2D1::ColorF::Black));
 }
 
 void DrawStageFood(Renderer& renderer, int stage) {
@@ -62,9 +55,7 @@ void ApplyWeapon(GameState& state, int weapon) {
 
 class LogoScene final : public Scene {
 public:
-    void OnEnter(GameApp&) override {
-        m_timer = 0.0f;
-    }
+    void OnEnter(GameApp&) override { m_timer = 0.0f; }
 
     void Update(GameApp& app, float deltaTime) override {
         m_timer += deltaTime;
@@ -136,7 +127,6 @@ public:
                 renderer.DrawImage(L"Assets\\배경\\clear" + std::to_wstring(i + 1) + L".png", CanvasWidth * 0.5f, CanvasHeight * 0.5f);
             }
         }
-
         DrawCoin(renderer, state.coin);
     }
 };
@@ -182,7 +172,6 @@ class ShopScene final : public Scene {
 public:
     void Update(GameApp& app, float) override {
         const InputState& input = app.Input();
-
         if (Clicked(input, 495.0f, 605.0f, 855.0f, 670.0f)) {
             app.ChangeScene(SceneKind::Home);
             return;
@@ -283,23 +272,27 @@ public:
 
     void OnEnter(GameApp& app) override {
         m_player.Reset(app.State(), m_stage);
-        m_boss.Reset(m_stage);
-        m_points.clear();
-        m_drawing = false;
+        m_gesture.Reset();
+        m_stageController = CreateStageController(m_stage);
     }
 
     void Update(GameApp& app, float deltaTime) override {
         InputState& input = app.Input();
-        m_player.Update(input, deltaTime);
-        m_boss.Update(deltaTime, m_player);
-        UpdateGesture(app);
+        const auto gesture = m_gesture.Update(input, deltaTime);
+        m_player.Update(input, deltaTime, m_gesture.IsOpen());
 
-        if (m_boss.IsDead()) {
+        if (gesture && m_stageController) {
+            m_stageController->ApplyGesture(gesture->id, m_player);
+        }
+        if (m_stageController) {
+            m_stageController->Update(deltaTime, m_player);
+        }
+
+        if (m_stageController && m_stageController->IsCleared()) {
             app.State().lastBattlePerfect = (m_player.Hp() == m_player.MaxHp());
             app.ChangeScene(SceneKind::Result, m_stage, true);
             return;
         }
-
         if (m_player.IsDead()) {
             app.State().lastBattlePerfect = false;
             app.ChangeScene(SceneKind::Result, m_stage, false);
@@ -307,71 +300,15 @@ public:
     }
 
     void Render(GameApp&, Renderer& renderer) override {
-        DrawBackground(renderer);
-        m_boss.Draw(renderer);
+        if (m_stageController) {
+            m_stageController->Draw(renderer, m_player);
+        }
         m_player.Draw(renderer);
         DrawPlayerHp(renderer);
-        DrawGesture(renderer);
+        m_gesture.Draw(renderer);
     }
 
 private:
-    void UpdateGesture(GameApp& app) {
-        InputState& input = app.Input();
-        if (!input.IsKeyDown('F')) {
-            if (!m_drawing) {
-                m_points.clear();
-            }
-            return;
-        }
-
-        D2D1_POINT_2F point = D2D1::Point2F(input.MouseX(), input.MousePicoY());
-        if (input.WasMousePressed()) {
-            m_points.clear();
-            m_points.push_back(point);
-            m_drawing = true;
-        } else if (input.IsMouseDown() && m_drawing) {
-            if (m_points.empty() || Distance(m_points.back(), point) > 3.0f) {
-                m_points.push_back(point);
-            }
-        } else if (input.WasMouseReleased() && m_drawing) {
-            float length = 0.0f;
-            for (size_t i = 1; i < m_points.size(); ++i) {
-                length += Distance(m_points[i - 1], m_points[i]);
-            }
-
-            // 원본은 QDollarRecognizer로 그린 모양을 인식했다.
-            // 여기서는 이식 첫 단계라서 충분히 긴 선을 그리면 공격으로 인정한다.
-            if (length > 45.0f) {
-                m_player.StartAttack();
-                m_boss.TakeGestureHit(m_player.AttackPower());
-            }
-            m_drawing = false;
-        }
-    }
-
-    void DrawBackground(Renderer& renderer) const {
-        if (m_stage == 1) {
-            constexpr float width = 1980.0f * 0.7f;
-            constexpr float height = 1080.0f * 0.7f;
-            for (int i = 1; i <= 8; ++i) {
-                renderer.DrawImage(L"Assets\\1stage\\" + std::to_wstring(i) + L".png", CanvasWidth * 0.5f, CanvasHeight * 0.5f, width, height);
-            }
-            return;
-        }
-
-        if (m_stage == 2) {
-            renderer.DrawImage(L"Assets\\2stage\\2.png", CanvasWidth * 0.5f, CanvasHeight * 0.5f, 726.0f * 1.8f, 574.0f * 1.8f);
-            renderer.DrawImage(L"Assets\\2stage\\floor_1.png", 160.0f, 70.0f, 274.0f, 63.0f);
-            renderer.DrawImage(L"Assets\\2stage\\floor_1.png", 420.0f, 70.0f, 274.0f, 63.0f);
-            return;
-        }
-
-        renderer.DrawImage(L"Assets\\3stage\\Fox BackGround 3.png", CanvasWidth * 0.5f, 410.0f, 800.0f * 3.0f, 480.0f * 3.0f);
-        renderer.DrawImage(L"Assets\\3stage\\Fox BackGround 2.png", CanvasWidth * 0.5f, 410.0f, 800.0f * 3.0f, 480.0f * 3.0f);
-        renderer.DrawImage(L"Assets\\3stage\\Fox BackGround 1.png", CanvasWidth * 0.5f, 410.0f, 800.0f * 2.0f, 480.0f * 2.0f);
-        renderer.DrawImage(L"Assets\\3stage\\Fox Platform.png", CanvasWidth * 0.5f, 120.0f, 752.0f * 2.0f, 128.0f * 2.0f);
-    }
-
     void DrawPlayerHp(Renderer& renderer) const {
         for (int i = 0; i < m_player.MaxHp(); ++i) {
             renderer.DrawImage(i < m_player.Hp() ? L"Assets\\playerui\\heart1.png" : L"Assets\\playerui\\heart2.png",
@@ -379,29 +316,11 @@ private:
         }
     }
 
-    void DrawGesture(Renderer& renderer) const {
-        renderer.DrawTextPico(L"A/D 이동   Shift 달리기   Space 점프   F 누른 상태로 마우스를 그리면 공격",
-            260.0f, 710.0f, 760.0f, 34.0f, 20.0f, D2D1::ColorF(D2D1::ColorF::White), DWRITE_TEXT_ALIGNMENT_CENTER);
-
-        if (m_points.empty() && !m_drawing) {
-            return;
-        }
-
-        renderer.FillRect(0.0f, 0.0f, CanvasWidth, CanvasHeight, D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.25f));
-        renderer.DrawImage(L"Assets\\Canvas\\1.png", CanvasWidth * 0.5f, CanvasHeight * 0.5f, CanvasWidth, CanvasHeight, 0.35f);
-        renderer.DrawImageClip(L"Assets\\Canvas\\2.png", 0.0f, 0.0f, 825.0f, 216.0f, CanvasWidth * 0.5f, CanvasHeight - 44.0f, 825.0f * 0.4f, 216.0f * 0.4f);
-
-        for (size_t i = 1; i < m_points.size(); ++i) {
-            renderer.DrawLine(m_points[i - 1].x, m_points[i - 1].y, m_points[i].x, m_points[i].y, D2D1::ColorF(D2D1::ColorF::Black), 4.0f);
-        }
-    }
-
 private:
     int m_stage = 1;
     Player m_player;
-    Boss m_boss;
-    bool m_drawing = false;
-    std::vector<D2D1_POINT_2F> m_points;
+    GestureCanvas m_gesture;
+    std::unique_ptr<StageController> m_stageController;
 };
 
 class ResultScene final : public Scene {
@@ -416,7 +335,6 @@ public:
         GameState& state = app.State();
         const int index = m_stage - 1;
         const bool perfect = state.lastBattlePerfect;
-
         if (perfect) {
             if (state.stageCoin[index] == 0) {
                 state.coin += 2;
@@ -434,7 +352,6 @@ public:
                 state.stageCoin[index] = 1;
             }
         }
-
         m_rewardApplied = true;
     }
 
@@ -494,7 +411,8 @@ public:
         for (int i = 0; i < m_current; ++i) {
             renderer.DrawImage(L"Assets\\배경\\end_" + std::to_wstring(i) + L".png", CanvasWidth * 0.5f, CanvasHeight * 0.5f);
         }
-        renderer.DrawImage(L"Assets\\배경\\end_" + std::to_wstring(m_current) + L".png", CanvasWidth * 0.5f, CanvasHeight * 0.5f, -1.0f, -1.0f, m_alpha);
+        renderer.DrawImage(L"Assets\\배경\\end_" + std::to_wstring(m_current) + L".png",
+            CanvasWidth * 0.5f, CanvasHeight * 0.5f, -1.0f, -1.0f, m_alpha);
     }
 
 private:
@@ -527,4 +445,3 @@ std::unique_ptr<Scene> CreateScene(SceneKind kind, int value, bool flag) {
         return std::make_unique<TitleScene>();
     }
 }
-

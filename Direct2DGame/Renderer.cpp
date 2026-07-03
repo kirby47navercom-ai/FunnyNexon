@@ -104,7 +104,8 @@ HRESULT Renderer::LoadTexture(const std::wstring& path, Texture& texture) {
     const std::filesystem::path realPath = AssetPath(path);
 
     ComPtr<IWICBitmapDecoder> decoder;
-    HRESULT result = m_wicFactory->CreateDecoderFromFilename(realPath.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, decoder.ReleaseAndGetAddressOf());
+    HRESULT result = m_wicFactory->CreateDecoderFromFilename(realPath.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad,
+        decoder.ReleaseAndGetAddressOf());
     if (FAILED(result)) {
         return result;
     }
@@ -125,7 +126,8 @@ HRESULT Renderer::LoadTexture(const std::wstring& path, Texture& texture) {
         return result;
     }
 
-    result = converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0, WICBitmapPaletteTypeMedianCut);
+    result = converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0,
+        WICBitmapPaletteTypeMedianCut);
     if (FAILED(result)) {
         return result;
     }
@@ -144,7 +146,8 @@ void Renderer::DrawImage(const std::wstring& path, float centerX, float centerY,
     Texture* texture = GetTexture(path);
     if (!texture) {
         FillRect(centerX - 80.0f, centerY - 24.0f, centerX + 80.0f, centerY + 24.0f, D2D1::ColorF(0.6f, 0.0f, 0.05f), 0.8f);
-        DrawTextPico(L"missing", centerX - 60.0f, centerY + 10.0f, 120.0f, 24.0f, 16.0f, D2D1::ColorF(D2D1::ColorF::White), DWRITE_TEXT_ALIGNMENT_CENTER);
+        DrawTextPico(L"missing", centerX - 60.0f, centerY + 10.0f, 120.0f, 24.0f, 16.0f,
+            D2D1::ColorF(D2D1::ColorF::White), DWRITE_TEXT_ALIGNMENT_CENTER);
         return;
     }
 
@@ -162,7 +165,8 @@ void Renderer::DrawImageClip(const std::wstring& path, float srcLeft, float srcB
     float centerX, float centerY, float drawWidth, float drawHeight, bool flipX, float opacity) {
     Texture* texture = GetTexture(path);
     if (!texture) {
-        FillRect(centerX - drawWidth * 0.5f, centerY - drawHeight * 0.5f, centerX + drawWidth * 0.5f, centerY + drawHeight * 0.5f, D2D1::ColorF(0.6f, 0.0f, 0.05f), 0.8f);
+        FillRect(centerX - drawWidth * 0.5f, centerY - drawHeight * 0.5f, centerX + drawWidth * 0.5f, centerY + drawHeight * 0.5f,
+            D2D1::ColorF(0.6f, 0.0f, 0.05f), 0.8f);
         return;
     }
 
@@ -240,4 +244,3 @@ D2D1_RECT_F Renderer::CenterRect(float centerX, float centerY, float width, floa
 D2D1_POINT_2F Renderer::ToD2DPoint(float x, float y) const {
     return D2D1::Point2F(x, CanvasHeight - y);
 }
-

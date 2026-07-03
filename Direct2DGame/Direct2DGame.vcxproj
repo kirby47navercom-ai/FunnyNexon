@@ -108,26 +108,33 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <ClCompile Include="Boss.cpp" />
     <ClCompile Include="GameApp.cpp" />
+    <ClCompile Include="GestureCanvas.cpp" />
+    <ClCompile Include="GestureRecognizer.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Patterns.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourcePath.cpp" />
     <ClCompile Include="Scenes.cpp" />
+    <ClCompile Include="Stages.cpp" />
   </ItemGroup>
 
   <ItemGroup>
-    <ClInclude Include="Boss.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="GestureCanvas.h" />
+    <ClInclude Include="GestureRecognizer.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Patterns.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourcePath.h" />
     <ClInclude Include="Scenes.h" />
+    <ClInclude Include="Stages.h" />
   </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

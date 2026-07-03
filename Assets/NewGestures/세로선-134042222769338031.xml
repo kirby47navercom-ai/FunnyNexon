@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name = "세로선">
+	<Stroke>
+		<Point X = "378" Y = "63" T = "0" Pressure = "0" />
+		<Point X = "378" Y = "66" T = "0" Pressure = "0" />
+		<Point X = "377" Y = "68" T = "0" Pressure = "0" />
+		<Point X = "377" Y = "74" T = "0" Pressure = "0" />
+		<Point X = "377" Y = "82" T = "0" Pressure = "0" />
+		<Point X = "377" Y = "89" T = "0" Pressure = "0" />
+		<Point X = "377" Y = "101" T = "0" Pressure = "0" />
+		<Point X = "376" Y = "115" T = "0" Pressure = "0" />
+		<Point X = "375" Y = "138" T = "0" Pressure = "0" />
+		<Point X = "374" Y = "157" T = "0" Pressure = "0" />
+		<Point X = "373" Y = "179" T = "0" Pressure = "0" />
+		<Point X = "371" Y = "208" T = "0" Pressure = "0" />
+		<Point X = "370" Y = "238" T = "0" Pressure = "0" />
+		<Point X = "369" Y = "259" T = "0" Pressure = "0" />
+		<Point X = "368" Y = "279" T = "0" Pressure = "0" />
+		<Point X = "366" Y = "296" T = "0" Pressure = "0" />
+		<Point X = "366" Y = "317" T = "0" Pressure = "0" />
+		<Point X = "365" Y = "333" T = "0" Pressure = "0" />
+		<Point X = "365" Y = "346" T = "0" Pressure = "0" />
+	</Stroke>
+</Gesture>

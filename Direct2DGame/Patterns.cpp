@@ -1,0 +1,78 @@
+#include "Patterns.h"
+
+#include "Renderer.h"
+
+#include <array>
+
+namespace {
+constexpr std::array<PatternInfo, 17> PatternTable = { {
+    { PatternId::Width, L"가로선", L"Assets\\Pattern\\1.png" },
+    { PatternId::Height, L"세로선", L"Assets\\Pattern\\2.png" },
+    { PatternId::FoxEar, L"여우귀", L"Assets\\Pattern\\3.png" },
+    { PatternId::Victory, L"브이", L"Assets\\Pattern\\4.png" },
+    { PatternId::Thunder, L"번개", L"Assets\\Pattern\\5.png" },
+    { PatternId::Night, L"N", L"Assets\\Pattern\\6.png" },
+    { PatternId::Star, L"별", L"Assets\\Pattern\\7.png" },
+    { PatternId::Zzz, L"Z", L"Assets\\Pattern\\8.png" },
+    { PatternId::Diamond, L"다이아몬드", L"Assets\\Pattern\\9.png" },
+    { PatternId::Square, L"네모", L"Assets\\Pattern\\10.png" },
+    { PatternId::Triangle, L"세모", L"Assets\\Pattern\\11.png" },
+    { PatternId::Black1, L"검정1", L"Assets\\Pattern\\12.png" },
+    { PatternId::Black2, L"검정2", L"Assets\\Pattern\\13.png" },
+    { PatternId::Black3, L"검정3", L"Assets\\Pattern\\14.png" },
+    { PatternId::Black4, L"검정4", L"Assets\\Pattern\\15.png" },
+    { PatternId::Black5, L"검정5", L"Assets\\Pattern\\16.png" },
+    { PatternId::Heart, L"하트", L"" }
+} };
+
+const PatternInfo UnknownInfo { PatternId::Unknown, L"인식 실패", L"" };
+}
+
+const PatternInfo& GetPatternInfo(PatternId id) {
+    const int index = static_cast<int>(id);
+    if (index < 0 || index >= static_cast<int>(PatternTable.size())) {
+        return UnknownInfo;
+    }
+    return PatternTable[static_cast<size_t>(index)];
+}
+
+PatternId PatternIdFromName(const std::wstring& name) {
+    for (const PatternInfo& info : PatternTable) {
+        if (name == info.name) {
+            return info.id;
+        }
+    }
+
+    // 원본 XML 일부는 깨진 하트 이름을 가지고 있어서, 파일명 매핑 실패 시 보조로 잡는다.
+    if (name == L"?섑듃") {
+        return PatternId::Heart;
+    }
+    return PatternId::Unknown;
+}
+
+PatternId RandomPattern(std::mt19937& rng, bool normalMonsterOnly) {
+    // 원본 normal ghost는 pattern_number - 5까지, 즉 검정 패턴을 제외한 0~10만 사용한다.
+    const int last = normalMonsterOnly ? static_cast<int>(PatternId::Triangle) : static_cast<int>(PatternId::Black5);
+    std::uniform_int_distribution<int> pick(0, last);
+    return static_cast<PatternId>(pick(rng));
+}
+
+bool IsDamagePattern(PatternId id) {
+    const int value = static_cast<int>(id);
+    return value >= static_cast<int>(PatternId::Width) && value <= static_cast<int>(PatternId::Black5);
+}
+
+void DrawPattern(Renderer& renderer, PatternId id, float x, float y, float scale) {
+    const PatternInfo& info = GetPatternInfo(id);
+    if (id == PatternId::Heart) {
+        renderer.DrawTextPico(L"하트", x - 42.0f, y + 12.0f, 84.0f, 28.0f, 22.0f,
+            D2D1::ColorF(0.96f, 0.20f, 0.35f), DWRITE_TEXT_ALIGNMENT_CENTER);
+        return;
+    }
+
+    if (info.imagePath[0] == L'\0') {
+        return;
+    }
+
+    renderer.DrawImage(info.imagePath, x, y, 128.0f * scale, 128.0f * scale);
+}

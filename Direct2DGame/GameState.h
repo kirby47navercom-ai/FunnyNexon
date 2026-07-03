@@ -1,10 +1,10 @@
 #pragma once
 
-// Python resource.py에 흩어져 있던 전역 진행 상태를 한 곳에 모은 구조체다.
+// 원본 resource.py에 흩어져 있던 전역 진행 상태를 한곳에 모은 구조체다.
 struct GameState {
     int coin = 0;
 
-    // 0: 미클리어, 1: 일반 클리어, 2: 완벽 클리어
+    // 0: 미클리어, 1: 일반 클리어, 2: 퍼펙트 클리어
     int stageClear[3] = { 0, 0, 0 };
     int stageCoin[3] = { 0, 0, 0 };
 
@@ -24,4 +24,3 @@ struct GameState {
         return stageClear[0] > 0 && stageClear[1] > 0 && stageClear[2] > 0;
     }
 };
-

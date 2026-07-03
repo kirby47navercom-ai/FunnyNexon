@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name = "가로선">
+	<Stroke>
+		<Point X = "104" Y = "227" T = "0" Pressure = "0" />
+		<Point X = "108" Y = "227" T = "0" Pressure = "0" />
+		<Point X = "119" Y = "228" T = "0" Pressure = "0" />
+		<Point X = "131" Y = "230" T = "0" Pressure = "0" />
+		<Point X = "162" Y = "232" T = "0" Pressure = "0" />
+		<Point X = "192" Y = "235" T = "0" Pressure = "0" />
+		<Point X = "242" Y = "239" T = "0" Pressure = "0" />
+		<Point X = "297" Y = "243" T = "0" Pressure = "0" />
+		<Point X = "331" Y = "245" T = "0" Pressure = "0" />
+		<Point X = "386" Y = "249" T = "0" Pressure = "0" />
+		<Point X = "423" Y = "251" T = "0" Pressure = "0" />
+		<Point X = "473" Y = "257" T = "0" Pressure = "0" />
+		<Point X = "514" Y = "261" T = "0" Pressure = "0" />
+		<Point X = "544" Y = "265" T = "0" Pressure = "0" />
+		<Point X = "580" Y = "271" T = "0" Pressure = "0" />
+		<Point X = "597" Y = "272" T = "0" Pressure = "0" />
+		<Point X = "606" Y = "273" T = "0" Pressure = "0" />
+	</Stroke>
+</Gesture>
