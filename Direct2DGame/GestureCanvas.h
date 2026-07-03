@@ -2,6 +2,7 @@
 
 #include "GestureRecognizer.h"
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -22,7 +23,7 @@ private:
     static double PointDistance(const GesturePoint& a, const GesturePoint& b);
 
 private:
-    GestureRecognizer m_recognizer;
+    std::shared_ptr<const GestureRecognizer> m_recognizer;
     std::vector<GesturePoint> m_points;
     std::optional<GestureResult> m_lastResult;
     bool m_loaded = false;
@@ -30,4 +31,3 @@ private:
     int m_strokeId = 0;
     float m_openAmount = 0.0f;
 };
-

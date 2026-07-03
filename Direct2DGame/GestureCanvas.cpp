@@ -5,8 +5,28 @@
 #include "Renderer.h"
 #include "ResourcePath.h"
 
+#include <Windows.h>
+
 #include <algorithm>
 #include <cmath>
+#include <memory>
+#include <mutex>
+#include <thread>
+
+namespace {
+struct GestureTemplateCache {
+    std::mutex mutex;
+    std::shared_ptr<GestureRecognizer> recognizer;
+    bool started = false;
+    bool ready = false;
+    bool loaded = false;
+};
+
+GestureTemplateCache& SharedTemplateCache() {
+    static GestureTemplateCache cache;
+    return cache;
+}
+}
 
 void GestureCanvas::Reset() {
     m_points.clear();
@@ -20,13 +40,48 @@ void GestureCanvas::LoadTemplates() {
     if (m_loaded) {
         return;
     }
-    m_loaded = m_recognizer.LoadFromFolder(AssetPath(L"Assets\\NewGestures"));
+
+    GestureTemplateCache& cache = SharedTemplateCache();
+    bool shouldStart = false;
+
+    {
+        std::lock_guard<std::mutex> lock(cache.mutex);
+        if (cache.ready) {
+            m_recognizer = cache.recognizer;
+            m_loaded = cache.loaded;
+            return;
+        }
+
+        if (!cache.started) {
+            cache.started = true;
+            shouldStart = true;
+        }
+    }
+
+    if (!shouldStart) {
+        return;
+    }
+
+    std::thread([] {
+        SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+
+        auto recognizer = std::make_shared<GestureRecognizer>();
+        const bool loaded = recognizer->LoadFromFolder(AssetPath(L"Assets\\NewGestures"));
+
+        GestureTemplateCache& workerCache = SharedTemplateCache();
+        std::lock_guard<std::mutex> lock(workerCache.mutex);
+        workerCache.recognizer = loaded ? recognizer : nullptr;
+        workerCache.loaded = loaded;
+        workerCache.ready = true;
+    }).detach();
 }
 
 std::optional<GestureResult> GestureCanvas::Update(const InputState& input, float deltaTime) {
-    LoadTemplates();
-
     const bool wantsOpen = input.IsKeyDown('F');
+    if (wantsOpen) {
+        LoadTemplates();
+    }
+
     const float direction = wantsOpen ? 1.0f : -1.0f;
     m_openAmount = std::clamp(m_openAmount + direction * deltaTime * 5.0f, 0.0f, 1.0f);
 
@@ -54,8 +109,8 @@ std::optional<GestureResult> GestureCanvas::Update(const InputState& input, floa
         }
     } else if (input.WasMouseReleased() && m_drawing) {
         m_drawing = false;
-        if (m_points.size() > 10 && m_recognizer.IsLoaded()) {
-            m_lastResult = m_recognizer.Recognize(m_points);
+        if (m_points.size() > 10 && m_loaded && m_recognizer && m_recognizer->IsLoaded()) {
+            m_lastResult = m_recognizer->Recognize(m_points);
             m_points.clear();
             if (m_lastResult->score >= 0.20 && m_lastResult->id != PatternId::Unknown) {
                 return m_lastResult;

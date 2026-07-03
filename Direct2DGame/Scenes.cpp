@@ -273,7 +273,6 @@ public:
     void OnEnter(GameApp& app) override {
         m_player.Reset(app.State(), m_stage);
         m_gesture.Reset();
-        m_gesture.LoadTemplates();
         m_stageController = CreateStageController(m_stage);
     }
 
