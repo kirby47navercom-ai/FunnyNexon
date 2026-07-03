@@ -3,6 +3,7 @@
 #include "Renderer.h"
 
 #include <array>
+#include <unordered_map>
 
 namespace {
 constexpr std::array<PatternInfo, 17> PatternTable = { {
@@ -37,21 +38,34 @@ const PatternInfo& GetPatternInfo(PatternId id) {
 }
 
 PatternId PatternIdFromName(const std::wstring& name) {
-    for (const PatternInfo& info : PatternTable) {
-        if (name == info.name) {
-            return info.id;
-        }
-    }
+    static const std::unordered_map<std::wstring, PatternId> aliases {
+        { L"가로선", PatternId::Width },
+        { L"세로선", PatternId::Height },
+        { L"여우귀", PatternId::FoxEar },
+        { L"브이", PatternId::Victory },
+        { L"번개", PatternId::Thunder },
+        { L"N", PatternId::Night },
+        { L"별", PatternId::Star },
+        { L"Z", PatternId::Zzz },
+        { L"다이아몬드", PatternId::Diamond },
+        { L"네모", PatternId::Square },
+        { L"세모", PatternId::Triangle },
+        { L"검정1", PatternId::Black1 },
+        { L"검정2", PatternId::Black2 },
+        { L"검정3", PatternId::Black3 },
+        { L"검정4", PatternId::Black4 },
+        { L"검정5", PatternId::Black5 },
+        { L"하트", PatternId::Heart }
+    };
 
-    // 원본 XML 일부는 깨진 하트 이름을 가지고 있어서, 파일명 매핑 실패 시 보조로 잡는다.
-    if (name == L"?섑듃") {
-        return PatternId::Heart;
+    const auto found = aliases.find(name);
+    if (found != aliases.end()) {
+        return found->second;
     }
     return PatternId::Unknown;
 }
 
 PatternId RandomPattern(std::mt19937& rng, bool normalMonsterOnly) {
-    // 원본 normal ghost는 pattern_number - 5까지, 즉 검정 패턴을 제외한 0~10만 사용한다.
     const int last = normalMonsterOnly ? static_cast<int>(PatternId::Triangle) : static_cast<int>(PatternId::Black5);
     std::uniform_int_distribution<int> pick(0, last);
     return static_cast<PatternId>(pick(rng));
