@@ -68,9 +68,11 @@ int GameApp::Run() {
     m_running = true;
 
     using Clock = std::chrono::steady_clock;
+    constexpr auto TargetFrameTime = std::chrono::duration<float>(1.0f / 60.0f);
     auto previous = Clock::now();
 
     while (m_running) {
+        const auto frameStart = Clock::now();
         m_input.BeginFrame();
 
         MSG message = {};
@@ -97,7 +99,14 @@ int GameApp::Run() {
         }
 
         Render();
-        Sleep(1);
+
+        const auto frameElapsed = Clock::now() - frameStart;
+        if (frameElapsed < TargetFrameTime) {
+            const auto rest = std::chrono::duration_cast<std::chrono::milliseconds>(TargetFrameTime - frameElapsed);
+            if (rest.count() > 0) {
+                Sleep(static_cast<DWORD>(rest.count()));
+            }
+        }
     }
 
     return 0;
@@ -217,4 +226,3 @@ void GameApp::UpdateMouseFromClient(LPARAM lParam, bool down, bool up, bool move
         m_input.OnMouseMove(x, y);
     }
 }
-

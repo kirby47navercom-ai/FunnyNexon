@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cwctype>
 #include <fstream>
 #include <limits>
-#include <regex>
 #include <sstream>
 
 namespace {
@@ -35,6 +35,33 @@ std::wstring PrefixName(const std::filesystem::path& path) {
         stem = stem.substr(0, dash);
     }
     return stem;
+}
+
+bool ExtractAttributeDouble(const std::wstring& tag, const std::wstring& name, double& value) {
+    size_t pos = tag.find(name);
+    while (pos != std::wstring::npos) {
+        const size_t afterName = pos + name.size();
+        size_t cursor = afterName;
+        while (cursor < tag.size() && iswspace(tag[cursor])) {
+            ++cursor;
+        }
+        if (cursor < tag.size() && tag[cursor] == L'=') {
+            ++cursor;
+            while (cursor < tag.size() && iswspace(tag[cursor])) {
+                ++cursor;
+            }
+            if (cursor < tag.size() && tag[cursor] == L'"') {
+                const size_t begin = cursor + 1;
+                const size_t end = tag.find(L'"', begin);
+                if (end != std::wstring::npos) {
+                    value = std::stod(tag.substr(begin, end - begin));
+                    return true;
+                }
+            }
+        }
+        pos = tag.find(name, afterName);
+    }
+    return false;
 }
 
 double SqrDistance(const GesturePoint& a, const GesturePoint& b) {
@@ -74,7 +101,9 @@ std::vector<GesturePoint> Resample(std::vector<GesturePoint> points, int count) 
     for (size_t i = 1; i < points.size();) {
         if (points[i].strokeId == points[i - 1].strokeId) {
             const double d = Distance(points[i - 1], points[i]);
-            if ((accumulated + d) >= interval) {
+            if (d <= 0.000001) {
+                ++i;
+            } else if ((accumulated + d) >= interval) {
                 GesturePoint q;
                 q.x = points[i - 1].x + ((interval - accumulated) / d) * (points[i].x - points[i - 1].x);
                 q.y = points[i - 1].y + ((interval - accumulated) / d) * (points[i].y - points[i - 1].y);
@@ -298,19 +327,34 @@ bool GestureRecognizer::LoadXmlFile(const std::filesystem::path& path) {
 
     std::vector<GesturePoint> points;
     int strokeId = 0;
-    std::wregex strokeRegex(LR"(<Stroke>([\s\S]*?)</Stroke>)");
-    std::wregex pointRegex(LR"xml(<Point\s+X\s*=\s*"([^"]+)"\s+Y\s*=\s*"([^"]+)")xml");
-
-    for (std::wsregex_iterator stroke(xml.begin(), xml.end(), strokeRegex), end; stroke != end; ++stroke) {
-        ++strokeId;
-        const std::wstring body = (*stroke)[1].str();
-        for (std::wsregex_iterator point(body.begin(), body.end(), pointRegex); point != end; ++point) {
-            GesturePoint p;
-            p.x = std::stod((*point)[1].str());
-            p.y = std::stod((*point)[2].str());
-            p.strokeId = strokeId;
-            points.push_back(p);
+    size_t strokeBegin = 0;
+    while ((strokeBegin = xml.find(L"<Stroke", strokeBegin)) != std::wstring::npos) {
+        const size_t strokeOpenEnd = xml.find(L'>', strokeBegin);
+        if (strokeOpenEnd == std::wstring::npos) {
+            break;
         }
+        const size_t strokeEnd = xml.find(L"</Stroke>", strokeOpenEnd);
+        if (strokeEnd == std::wstring::npos) {
+            break;
+        }
+
+        ++strokeId;
+        size_t pointBegin = strokeOpenEnd + 1;
+        while ((pointBegin = xml.find(L"<Point", pointBegin)) != std::wstring::npos && pointBegin < strokeEnd) {
+            const size_t pointEnd = xml.find(L"/>", pointBegin);
+            if (pointEnd == std::wstring::npos || pointEnd > strokeEnd) {
+                break;
+            }
+
+            const std::wstring pointTag = xml.substr(pointBegin, pointEnd - pointBegin + 2);
+            double x = 0.0;
+            double y = 0.0;
+            if (ExtractAttributeDouble(pointTag, L"X", x) && ExtractAttributeDouble(pointTag, L"Y", y)) {
+                points.push_back({ x, y, strokeId });
+            }
+            pointBegin = pointEnd + 2;
+        }
+        strokeBegin = strokeEnd + 9;
     }
 
     if (points.size() < 2) {

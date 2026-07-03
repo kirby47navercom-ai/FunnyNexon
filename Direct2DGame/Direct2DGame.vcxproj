@@ -118,6 +118,10 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourcePath.cpp" />
     <ClCompile Include="Scenes.cpp" />
+    <ClCompile Include="Stage1.cpp" />
+    <ClCompile Include="Stage2.cpp" />
+    <ClCompile Include="Stage3.cpp" />
+    <ClCompile Include="StageCommon.cpp" />
     <ClCompile Include="Stages.cpp" />
   </ItemGroup>
 
@@ -134,6 +138,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourcePath.h" />
     <ClInclude Include="Scenes.h" />
+    <ClInclude Include="StageCommon.h" />
     <ClInclude Include="Stages.h" />
   </ItemGroup>
 

@@ -23,3 +23,6 @@ public:
 };
 
 std::unique_ptr<StageController> CreateStageController(int stage);
+std::unique_ptr<StageController> CreateStage1Controller();
+std::unique_ptr<StageController> CreateStage2Controller();
+std::unique_ptr<StageController> CreateStage3Controller();

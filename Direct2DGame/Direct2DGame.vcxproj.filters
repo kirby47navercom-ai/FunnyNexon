@@ -22,6 +22,10 @@
     <ClCompile Include="Renderer.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="ResourcePath.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Scenes.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Stage1.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Stage2.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Stage3.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="StageCommon.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Stages.cpp"><Filter>Source Files</Filter></ClCompile>
   </ItemGroup>
 
@@ -38,6 +42,7 @@
     <ClInclude Include="Renderer.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="ResourcePath.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Scenes.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="StageCommon.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Stages.h"><Filter>Header Files</Filter></ClInclude>
   </ItemGroup>
 </Project>
